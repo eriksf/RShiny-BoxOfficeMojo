@@ -1,4 +1,5 @@
 # Load libraries
+library(RCurl)
 library(XML)
 library(dplyr)
 options(warn=-1)  # turn off unneccessary NON-EXISTING NA warnings in the code from XML library
@@ -30,7 +31,8 @@ get_data_studios <- function() {
 # @return: dataframe of Oscar movies
 # =========================================================================
 get_data_oscars <- function() {
-    url <- "http://www.boxofficemojo.com/oscar/?sort=studio&order=ASC&p=.htm"
+    url <- "https://www.boxofficemojo.com/oscar/?sort=studio&order=ASC&p=.htm"
+    doc <- getURL(url)
     colNames <- c("ROW"="character",
                   "YEAR"="numeric",
                   "MOVIE"="character",
@@ -39,11 +41,11 @@ get_data_oscars <- function() {
                   "NOMINATIONS"="numeric",
                   "WINS"="numeric",
                   "RELEASEDATE"="character")
-    
+
     # get data
-    tables <- readHTMLTable(url, header=TRUE, stringsAsFactors=FALSE, colClasses=unname(colNames))
+    tables <- readHTMLTable(doc, header=TRUE, stringsAsFactors=FALSE, colClasses=unname(colNames))
     df <- tables[[4]]  # data is in the 4th table
-    
+
     # reshape data
     colnames(df) <- names(colNames)
     df <- df %>%
@@ -103,19 +105,20 @@ get_data_producers <- function() {
 # @return: dataframe of table
 # =========================================================================
 scrape_table_studios <- function(year) {
-    url <- sprintf("http://www.boxofficemojo.com/studio/?view=majorstudio&view2=yearly&yr=%s&p=.htm", year)
+    url <- sprintf("https://www.boxofficemojo.com/studio/?view=majorstudio&view2=yearly&yr=%s&p=.htm", year)
+    doc <- getURL(url)
     colNames <- c("RANK"="integer",
                   "STUDIO"="character",
                   "MARKETSHARE"="Percent",
                   "BOXOFFICE"="Currency",
                   "MOVIES_COUNT"="integer",
                   "MOVIES_YEAR"="integer")
-    
+
     # get data
-    tables <- readHTMLTable(url, header=TRUE, stringsAsFactors=FALSE, colClasses=unname(colNames))
+    tables <- readHTMLTable(doc, header=TRUE, stringsAsFactors=FALSE, colClasses=unname(colNames))
     df <- tables[[4]]  # data is in the 4th table
-    
-    
+
+
     # reshape data
     colnames(df) <- names(colNames)
     df <- df %>%
@@ -134,7 +137,8 @@ scrape_table_studios <- function(year) {
 # @return: dataframe of table
 # =========================================================================
 scrape_people <- function(role) {
-    url <- sprintf("http://www.boxofficemojo.com/people/?view=%s&sort=sumgross&order=DESC&p=.htm", role)
+    url <- sprintf("https://www.boxofficemojo.com/people/?view=%s&sort=sumgross&order=DESC&p=.htm", role)
+    doc <- getURL(url)
     colNames <- c("RANK"="numeric",
                   "PERSON"="character",
                   "TOTAL_BO"="Currency",
@@ -142,11 +146,11 @@ scrape_people <- function(role) {
                   "AVERAGE_BO"="Currency",
                   "BEST_PICTURE"="character",
                   "BEST_BO"="Currency")
-    
+
     # get data
-    tables <- readHTMLTable(url, header=TRUE, stringsAsFactors=FALSE, colClasses=unname(colNames))
+    tables <- readHTMLTable(doc, header=TRUE, stringsAsFactors=FALSE, colClasses=unname(colNames))
     df <- tables[[4]]  # data is in the 4th table
-    
+
     # reshape data
     colnames(df) <- names(colNames)
     return(df)
